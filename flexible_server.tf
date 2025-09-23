@@ -1,4 +1,4 @@
-resource "azurerm_resource_group_template_deployment" "flexible_server" {
+resource azurerm_resource_group_template_deployment flexible_server {
   deployment_mode     = "Incremental"
   name                = local.fs_name
   template_content    = file("${path.module}/templates/arm_postgres.json")
@@ -37,7 +37,7 @@ resource "azurerm_resource_group_template_deployment" "flexible_server" {
   )
 }
 
-# resource "azurerm_resource_group_template_deployment" "fs_replica" {
+# resource azurerm_resource_group_template_deployment fs_replica {
 #   deployment_mode     = "Incremental"
 #   name                = local.fs_replica_name
 #   template_content    = file("${path.module}/templates/arm_postgres.json")
@@ -76,7 +76,7 @@ resource "azurerm_resource_group_template_deployment" "flexible_server" {
 #   )
 # }
 
-resource "azurerm_postgresql_flexible_server_active_directory_administrator" "fs_aad" {
+resource azurerm_postgresql_flexible_server_active_directory_administrator fs_aad {
   depends_on = [
     azurerm_resource_group_template_deployment.flexible_server
   ]
@@ -89,7 +89,20 @@ resource "azurerm_postgresql_flexible_server_active_directory_administrator" "fs
   tenant_id           = data.azurerm_client_config.current.tenant_id
 }
 
-# resource "azurerm_postgresql_flexible_server_active_directory_administrator" "fs_replica_aad" {
+resource azurerm_postgresql_flexible_server_active_directory_administrator vm_aad {
+  depends_on = [
+    azurerm_resource_group_template_deployment.flexible_server
+  ]
+
+  object_id           = azurerm_linux_virtual_machine.vm01.identity[0].principal_id
+  principal_name      = azurerm_linux_virtual_machine.vm01.name
+  principal_type      = "ServicePrincipal"
+  resource_group_name = data.azurerm_resource_group.rg.name
+  server_name         = local.fs_name
+  tenant_id           = data.azurerm_client_config.current.tenant_id
+}
+
+# resource azurerm_postgresql_flexible_server_active_directory_administrator fs_replica_aad {
 #   depends_on = [
 #     azurerm_resource_group_template_deployment.fs_replica
 #   ]
@@ -102,21 +115,21 @@ resource "azurerm_postgresql_flexible_server_active_directory_administrator" "fs
 #   tenant_id           = data.azurerm_client_config.current.tenant_id
 # }
 
-resource "azurerm_postgresql_flexible_server_configuration" "fs_config" {
+resource azurerm_postgresql_flexible_server_configuration fs_config {
   for_each  = module.global.server_configs
   name      = each.key
   server_id = data.azurerm_postgresql_flexible_server.fs.id
   value     = each.value
 }
 
-# resource "azurerm_postgresql_flexible_server_configuration" "fs_replica_config" {
+# resource azurerm_postgresql_flexible_server_configuration fs_replica_config {
 #   for_each  = module.global.server_configs
 #   name      = each.key
 #   server_id = data.azurerm_postgresql_flexible_server.fs_replica.id
 #   value     = each.value
 # }
-#
-resource "azurerm_monitor_diagnostic_setting" "fs" {
+
+resource azurerm_monitor_diagnostic_setting fs {
   name                       = "ds_fs"
   target_resource_id         = data.azurerm_postgresql_flexible_server.fs.id
   log_analytics_workspace_id = data.azurerm_log_analytics_workspace.law.id
@@ -133,7 +146,7 @@ resource "azurerm_monitor_diagnostic_setting" "fs" {
   }
 }
 
-# resource "azurerm_monitor_diagnostic_setting" "fs_replica" {
+# resource azurerm_monitor_diagnostic_setting fs_replica {
 #   name                       = "ds_fs"
 #   target_resource_id         = data.azurerm_postgresql_flexible_server.fs_replica.id
 #   log_analytics_workspace_id = data.azurerm_log_analytics_workspace.law.id
