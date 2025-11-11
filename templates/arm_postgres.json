@@ -72,6 +72,9 @@
     "storage_size_gb": {
       "type": "String"
     },
+    "storage_tier": {
+      "type": "String"
+    },
     "storage_throughput": {
       "type": "String"
     },
@@ -133,6 +136,7 @@
           "storageSizeGB": "[parameters('storage_size_gb')]",
           "autoGrow"     : "[parameters('storage_autogrow')]",
           "iops"         : "[if(empty(parameters('storage_iops')), json('null')  , parameters('storage_iops'))]",
+          "tier"         : "[parameters('storage_tier')]",
           "throughput"   : "[if(empty(parameters('storage_throughput')), json('null')  , parameters('storage_throughput'))]",
           "type"         : "[parameters('storage_type')]"
         },

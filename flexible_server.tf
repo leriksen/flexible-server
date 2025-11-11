@@ -1,10 +1,10 @@
 resource azurerm_resource_group_template_deployment flexible_server {
   deployment_mode     = "Incremental"
-  name                = local.fs_name
+  name                = local.psql_name
   template_content    = file("${path.module}/templates/arm_postgres.json")
   resource_group_name = data.azurerm_resource_group.rg.name
   parameters_content = templatefile(
-    "${path.module}/templates/parameters_postgres.json",
+    "${path.module}/templates/parameters_postgres.json.tpl",
     {
       active_directory_auth     = module.global.active_directory_auth
       availability_zone         = module.global.availability_zone
@@ -18,7 +18,7 @@ resource azurerm_resource_group_template_deployment flexible_server {
       ha_mode                   = module.global.ha_mode
       identity_type             = module.global.identity_type
       location                  = data.azurerm_resource_group.rg.location
-      name                      = local.fs_name
+      name                      = local.psql_name
       password_auth             = module.global.password_auth
       public_network_access     = module.global.public_network_access
       replication_role          = "Primary"
@@ -29,6 +29,7 @@ resource azurerm_resource_group_template_deployment flexible_server {
       storage_autogrow          = module.global.storage_autogrow
       storage_iops              = module.global.storage_iops
       storage_size_gb           = module.global.storage_size_gb
+      storage_tier              = module.global.storage_tier
       storage_throughput        = module.global.storage_throughput
       storage_type              = module.global.storage_type
       tenant_id                 = data.azurerm_client_config.current.tenant_id
@@ -76,32 +77,31 @@ resource azurerm_resource_group_template_deployment flexible_server {
 #   )
 # }
 
-resource azurerm_postgresql_flexible_server_active_directory_administrator fs_aad {
-  depends_on = [
-    azurerm_resource_group_template_deployment.flexible_server
-  ]
-
-  object_id           = data.azurerm_client_config.current.object_id
-  principal_name      = data.azuread_service_principal.self.display_name
-  principal_type      = "ServicePrincipal"
-  resource_group_name = data.azurerm_resource_group.rg.name
-  server_name         = local.fs_name
-  tenant_id           = data.azurerm_client_config.current.tenant_id
-}
-
-resource azurerm_postgresql_flexible_server_active_directory_administrator vm_aad {
-  depends_on = [
-    azurerm_resource_group_template_deployment.flexible_server
-  ]
-
-  object_id           = azurerm_linux_virtual_machine.vm01.identity[0].principal_id
-  principal_name      = azurerm_linux_virtual_machine.vm01.name
-  principal_type      = "ServicePrincipal"
-  resource_group_name = data.azurerm_resource_group.rg.name
-  server_name         = local.fs_name
-  tenant_id           = data.azurerm_client_config.current.tenant_id
-}
-
+# resource azurerm_postgresql_flexible_server_active_directory_administrator fs_aad {
+#   depends_on = [
+#     azurerm_resource_group_template_deployment.flexible_server
+#   ]
+#
+#   object_id           = data.azurerm_client_config.current.object_id
+#   principal_name      = data.azuread_service_principal.self.display_name
+#   principal_type      = "ServicePrincipal"
+#   resource_group_name = data.azurerm_resource_group.rg.name
+#   server_name         = local.fs_name
+#   tenant_id           = data.azurerm_client_config.current.tenant_id
+# }
+# resource azurerm_postgresql_flexible_server_active_directory_administrator vm_aad {
+#   depends_on = [
+#     azurerm_resource_group_template_deployment.flexible_server
+#   ]
+#
+#   object_id           = azurerm_linux_virtual_machine.vm01.identity[0].principal_id
+#   principal_name      = azurerm_linux_virtual_machine.vm01.name
+#   principal_type      = "ServicePrincipal"
+#   resource_group_name = data.azurerm_resource_group.rg.name
+#   server_name         = local.fs_name
+#   tenant_id           = data.azurerm_client_config.current.tenant_id
+# }
+#
 # resource azurerm_postgresql_flexible_server_active_directory_administrator fs_replica_aad {
 #   depends_on = [
 #     azurerm_resource_group_template_deployment.fs_replica
@@ -114,14 +114,14 @@ resource azurerm_postgresql_flexible_server_active_directory_administrator vm_aa
 #   server_name         = local.fs_replica_name
 #   tenant_id           = data.azurerm_client_config.current.tenant_id
 # }
-
-resource azurerm_postgresql_flexible_server_configuration fs_config {
-  for_each  = module.global.server_configs
-  name      = each.key
-  server_id = data.azurerm_postgresql_flexible_server.fs.id
-  value     = each.value
-}
-
+#
+# resource azurerm_postgresql_flexible_server_configuration fs_config {
+#   for_each  = module.global.server_configs
+#   name      = each.key
+#   server_id = data.azurerm_postgresql_flexible_server.fs.id
+#   value     = each.value
+# }
+#
 # resource azurerm_postgresql_flexible_server_configuration fs_replica_config {
 #   for_each  = module.global.server_configs
 #   name      = each.key
@@ -129,22 +129,22 @@ resource azurerm_postgresql_flexible_server_configuration fs_config {
 #   value     = each.value
 # }
 
-resource azurerm_monitor_diagnostic_setting fs {
-  name                       = "ds_fs"
-  target_resource_id         = data.azurerm_postgresql_flexible_server.fs.id
-  log_analytics_workspace_id = data.azurerm_log_analytics_workspace.law.id
-
-  dynamic "enabled_log" {
-    for_each = data.azurerm_monitor_diagnostic_categories.fs.log_category_groups
-    content {
-      category_group = enabled_log.value
-    }
-  }
-
-  enabled_metric {
-    category = "AllMetrics"
-  }
-}
+# resource azurerm_monitor_diagnostic_setting fs {
+#   name                       = "ds_fs"
+#   target_resource_id         = data.azurerm_postgresql_flexible_server.fs.id
+#   log_analytics_workspace_id = data.azurerm_log_analytics_workspace.law.id
+#
+#   dynamic "enabled_log" {
+#     for_each = data.azurerm_monitor_diagnostic_categories.fs.log_category_groups
+#     content {
+#       category_group = enabled_log.value
+#     }
+#   }
+#
+#   enabled_metric {
+#     category = "AllMetrics"
+#   }
+# }
 
 # resource azurerm_monitor_diagnostic_setting fs_replica {
 #   name                       = "ds_fs"
@@ -162,38 +162,38 @@ resource azurerm_monitor_diagnostic_setting fs {
 #     category = "AllMetrics"
 #   }
 # }
-
-resource azurerm_role_assignment backup_role_fs {
-  principal_id         = data.azurerm_data_protection_backup_vault.bv.identity[0].principal_id
-  role_definition_name = "PostgreSQL Flexible Server Long Term Retention Backup Role"
-  scope                = data.azurerm_postgresql_flexible_server.fs.id
-}
-
-
-resource azurerm_data_protection_backup_policy_postgresql_flexible_server postgresql_backup_policy {
-  name     = "postgresql-backup-policy-fs"
-  vault_id = data.azurerm_data_protection_backup_vault.bv.id
-  backup_repeating_time_intervals = [
-    "R/2025-09-19T05:30:00+10:00/P1W"
-  ]
-  time_zone = module.global.timezone
-
-  default_retention_rule {
-    life_cycle {
-      duration        = "P4M"
-      data_store_type = "VaultStore"
-    }
-  }
-}
-
-resource azurerm_data_protection_backup_instance_postgresql_flexible_server postgresql_backup_instance_fs {
-  name             = format("backup-%s", data.azurerm_postgresql_flexible_server.fs.name)
-  location         = data.azurerm_resource_group.rg.location
-  vault_id         = data.azurerm_data_protection_backup_vault.bv.id
-  server_id        = data.azurerm_postgresql_flexible_server.fs.id
-  backup_policy_id = azurerm_data_protection_backup_policy_postgresql_flexible_server.postgresql_backup_policy.id
-
-  depends_on = [
-    azurerm_role_assignment.backup_role_fs
-  ]
-}
+#
+# resource azurerm_role_assignment backup_role_fs {
+#   principal_id         = data.azurerm_data_protection_backup_vault.bv.identity[0].principal_id
+#   role_definition_name = "PostgreSQL Flexible Server Long Term Retention Backup Role"
+#   scope                = data.azurerm_postgresql_flexible_server.fs.id
+# }
+#
+#
+# resource azurerm_data_protection_backup_policy_postgresql_flexible_server postgresql_backup_policy {
+#   name     = "postgresql-backup-policy-fs"
+#   vault_id = data.azurerm_data_protection_backup_vault.bv.id
+#   backup_repeating_time_intervals = [
+#     "R/2025-09-19T05:30:00+10:00/P1W"
+#   ]
+#   time_zone = module.global.timezone
+#
+#   default_retention_rule {
+#     life_cycle {
+#       duration        = "P4M"
+#       data_store_type = "VaultStore"
+#     }
+#   }
+# }
+#
+# resource azurerm_data_protection_backup_instance_postgresql_flexible_server postgresql_backup_instance_fs {
+#   name             = format("backup-%s", data.azurerm_postgresql_flexible_server.fs.name)
+#   location         = data.azurerm_resource_group.rg.location
+#   vault_id         = data.azurerm_data_protection_backup_vault.bv.id
+#   server_id        = data.azurerm_postgresql_flexible_server.fs.id
+#   backup_policy_id = azurerm_data_protection_backup_policy_postgresql_flexible_server.postgresql_backup_policy.id
+#
+#   depends_on = [
+#     azurerm_role_assignment.backup_role_fs
+#   ]
+# }

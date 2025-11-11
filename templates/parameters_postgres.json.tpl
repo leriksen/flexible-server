@@ -68,6 +68,9 @@
   "storage_size_gb": {
     "value": "${storage_size_gb}"
   },
+  "storage_tier": {
+    "value": "${storage_tier}"
+  },
   "storage_throughput": {
     "value": "${storage_throughput}"
   },

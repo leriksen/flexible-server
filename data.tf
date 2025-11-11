@@ -19,7 +19,7 @@ data azurerm_user_assigned_identity umi {
 }
 
 data azurerm_key_vault kv {
-  name                = "psqlkv01"
+  name                = "psqlkv02"
   resource_group_name = data.azurerm_resource_group.rg.name
 }
 
@@ -49,7 +49,7 @@ data azurerm_postgresql_flexible_server fs {
     azurerm_resource_group_template_deployment.flexible_server
   ]
   resource_group_name = data.azurerm_resource_group.rg.name
-  name = local.fs_name
+  name = local.psql_name
 }
 
 data "azurerm_monitor_diagnostic_categories" fs {

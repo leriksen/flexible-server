@@ -47,7 +47,7 @@ output "identity_type" {
 }
 
 output "index" {
-  value = "1"
+  value = "2"
 }
 
 output "location" {
@@ -96,8 +96,8 @@ output "storage_autogrow" {
   value = "Disabled"
 }
 
-output "storage_autogrow_bool" {
-  value = false
+output "storage_tier" {
+  value = "P1"
 }
 
 output "storage_iops" {
@@ -113,7 +113,7 @@ output "storage_type" {
 }
 
 output "storage_size_gb" {
-  value = "128"
+  value = "32"
 }
 
 output "storage_size_mb" {
