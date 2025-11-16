@@ -2,6 +2,12 @@
   "active_directory_auth": {
     "value": "${active_directory_auth}"
   },
+  "administrator_login": {
+    "value": "${administrator_login}"
+  },
+  "administrator_login_password": {
+    "value": "${administrator_login_password}"
+  },
   "availability_zone": {
     "value": "${availability_zone}"
   },

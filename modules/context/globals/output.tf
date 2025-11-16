@@ -17,13 +17,12 @@ output "availability_zone" {
 output "backup_retention_days" {
   value = "7"
 }
-
-output "cluster_size" {
-  value = "2"
+output "day_of_week" {
+  value = "1"
 }
 
 output "ec_sku_name" {
-  value = "Standard_D4ads_v5"
+  value = "Standard_D2ads_v5"
 }
 
 output "encryption_type" {
@@ -55,7 +54,7 @@ output "location" {
 }
 
 output "password_auth" {
-  value = "Disabled"
+  value = "Enabled"
 }
 
 output "password_auth_bool" {
@@ -67,21 +66,30 @@ output "pg_version" {
 }
 
 output "public_network_access" {
-  value = "Disabled"
+  value = "Enabled"
 }
 
 output "server_configs" {
   value = {
-    "pg_qs.query_capture_mode"              = "ALL"
-    "pgms_wait_sampling.query_capture_mode" = "ALL"
-    "track_io_timing"                       = "ON"
-    "pgbouncer.enabled"                     = "true"
-    "azure.extensions"                      = "VECTOR"
+    # note the casing is chosen to reduce TF flip/flops
+    "require_secure_transport"   = "OFF" # turn on SSL later once we get certs sorted
+    "log_line_prefix"            = "t=%m u=%u db=%d pid=[%p]" # audit log line format
+    "log_statement"              = "none" # dont use normal pg logging
+    "pgaudit.log"                = "ALL" # READ is not recommended
+    "pgaudit.log_catalog"        = "on" # following a MS PG recommendations
+    "pgaudit.log_level"          = "INFO"
+    "pgaudit.log_client"         = "ON"
+    "pgaudit.Log_parameter"      = "off"
+    "pgaudit.Log_relation"       = "off"
+    "pgaudit.Log_statement"      = "on"
+    "pgaudit.log_statement_once" = "off"
+    "azure.extensions"           = "PGAUDIT"
+    "shared_preload_libraries"   = "pgaudit" # needs to be lc, so tf doesnt flip/flop
   }
 }
 
 output "sku_name" {
-  value = "GP_Standard_D4ads_v5"
+  value = "GP_Standard_D2ads_v5"
 }
 
 output "sku_tier" {
@@ -92,20 +100,26 @@ output "standby_availability_zone" {
   value = "2"
 }
 
+output "start_hour" {
+  value = "1"
+}
+output "start_minute" {
+  value = "30"
+}
 output "storage_autogrow" {
   value = "Disabled"
 }
 
 output "storage_tier" {
-  value = "P1"
+  value = "P10"
 }
 
 output "storage_iops" {
-  value = ""
+  value = "3000"
 }
 
 output "storage_throughput" {
-  value = ""
+  value = "125"
 }
 
 output "storage_type" {
@@ -113,7 +127,7 @@ output "storage_type" {
 }
 
 output "storage_size_gb" {
-  value = "32"
+  value = "128"
 }
 
 output "storage_size_mb" {

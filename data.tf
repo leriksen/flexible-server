@@ -53,6 +53,9 @@ data azurerm_postgresql_flexible_server fs {
 }
 
 data "azurerm_monitor_diagnostic_categories" fs {
+  depends_on = [
+    azurerm_resource_group_template_deployment.flexible_server
+  ]
   resource_id = data.azurerm_postgresql_flexible_server.fs.id
 }
 

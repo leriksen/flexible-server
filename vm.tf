@@ -8,10 +8,6 @@
 #     azurerm_network_interface.nic01.id,
 #   ]
 #
-#   identity {
-#     type = "SystemAssigned"
-#   }
-#
 #   admin_ssh_key {
 #     username   = "adminuser"
 #     public_key = file("~/.ssh/id_rsa.pub")
