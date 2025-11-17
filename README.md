@@ -1,0 +1,4 @@
+flexible server with pgaudit
+
+"message": "t=2025-11-16 08:54:55.904 UTC u=azuresu db=postgres pid=[914]LOG:  AUDIT: SESSION,16,1,READ,SELECT,,,select archived_count from pg_catalog.pg_stat_archiver where (last_failed_time - last_archived_time) >= '10 minute'::interval,<not logged>"
+
